@@ -1,0 +1,43 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: api-gateway
+  zipkin:
+    base-url: http://localhost:9411
+  sleuth:
+    sampler:
+      probability: 1.0
+  cloud:
+    gateway:
+      routes:
+        - id: task-user-service
+          uri: lb://TASK-USER-SERVICE
+          predicates:
+            - Path=/users/**
+        - id: task-service
+          uri: lb://TASK-SERVICE
+          predicates:
+            - Path=/tasks/**
+        - id: task-submission-service
+          uri: lb://TASK-SUBMISSION-SERVICE
+          predicates:
+            - Path=/submissions/**
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*" 
+            
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://localhost:8085/eureka
